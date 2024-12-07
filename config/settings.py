@@ -25,11 +25,17 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',
     'djoser',
+
+    # Apps
+    'users',
 ]
 
 INSTALLED_APPS += [
     'drf_spectacular',
 ]
+
+# ========== CUSTOM USER MODEL ==========
+AUTH_USER_MODEL = 'users.User'
 
 # ========== MIDDLEWARE ==========
 MIDDLEWARE = [
