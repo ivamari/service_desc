@@ -28,6 +28,7 @@ INSTALLED_APPS = [
 
     # Apps
     'users',
+    'tickets',
 ]
 
 INSTALLED_APPS += [
