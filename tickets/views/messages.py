@@ -4,7 +4,7 @@ from rest_framework.viewsets import GenericViewSet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
 from tickets.models.messages import Message
-from tickets.models.tickets import Ticket
+from tickets.models.tickets import Ticket, TicketStatus
 from tickets.permissions import IsManager
 from tickets.serializers.messages import (
     MessageListSerializer,
@@ -47,5 +47,49 @@ class MessageViewSet(ExtendedView, GenericViewSet, mixins.ListModelMixin,
             from_email=self.request.user.email,
             to_email=ticket.client.email,
             subject="Ответ на ваше обращение",
+            text=message.message
+        )
+
+
+@extend_schema_view(
+    list=extend_schema(summary='Автоответ на обращение клиента',
+                       tags=['Обращения']),
+    create=extend_schema(summary='Создать обращение',
+                         tags=['Обращения']),
+)
+class ClientMessagesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                            GenericViewSet):
+    serializer_class = MessageCreateSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        tickets = Ticket.objects.filter(client=user)
+        return Message.objects.filter(ticket__in=tickets).order_by(
+            '-created_at')[:1]
+
+    def perform_create(self, serializer):
+        user = self.request.user
+
+        ticket = Ticket.objects.filter(
+            client=user, status__in=('new', 'in_progress')).first()
+
+        if not ticket:
+            ticket = Ticket.objects.create(
+                client=user,
+                status=TicketStatus.objects.get(code='new'),
+            )
+
+        serializer.save(ticket=ticket, user=user)
+
+        message = Message.objects.create(
+            ticket=ticket,
+            user=None,
+            message="Ваше сообщение получено. Мы скоро свяжемся с вами."
+        )
+
+        EmailService.send_email(
+            from_email='noreply@service_desc.com',
+            to_email=user.email,
+            subject="Ваше сообщение получено",
             text=message.message
         )
