@@ -12,12 +12,11 @@ class TicketStatusAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('id', 'client', 'status', 'created_at', 'manager')
+    list_display = ('id', 'client', 'status', 'created_at', 'manager',)
     list_display_links = ('id', 'client',)
 
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('ticket', 'user', 'created_at', 'message')
+    list_display = ('ticket', 'user', 'created_at', 'text',)
     list_display_links = ('ticket',)
-

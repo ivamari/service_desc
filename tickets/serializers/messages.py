@@ -11,7 +11,7 @@ class MessageListSerializer(serializers.ModelSerializer):
             'ticket',
             'user',
             'created_at',
-            'message',
+            'text',
         )
 
 
@@ -19,5 +19,5 @@ class MessageCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = (
-            'message',
+            'text',
         )

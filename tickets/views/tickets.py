@@ -1,19 +1,22 @@
-from drf_spectacular.utils import extend_schema_view, extend_schema
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins
+from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
-from rest_framework.response import Response
+from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
+
+from drf_spectacular.utils import extend_schema_view, extend_schema
 
 from tickets.models.messages import Message
 from tickets.models.tickets import Ticket, TicketStatus
 from tickets.permissions import IsManager
 from tickets.serializers.tickets import TicketSerializer
+from tickets.services import EmailService
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Список обращений', tags=['Обращения']),
+    list=extend_schema(summary='Список обращений',
+                       tags=['Обращения | Менеджеры']),
 )
 class TicketView(GenericViewSet, mixins.ListModelMixin):
     queryset = Ticket.objects.all()
@@ -25,7 +28,7 @@ class TicketView(GenericViewSet, mixins.ListModelMixin):
 
     @extend_schema(
         summary='Назначить обращение текущему менеджеру',
-        tags=['Обращения'],
+        tags=['Обращения | Менеджеры'],
         request=None,
     )
     @action(methods=['POST'], detail=True, url_path='assign-to-me')
@@ -46,7 +49,7 @@ class TicketView(GenericViewSet, mixins.ListModelMixin):
 
     @extend_schema(
         summary='Закрыть обращение',
-        tags=['Обращения'],
+        tags=['Обращения | Менеджеры'],
         request=None,
     )
     @action(methods=['POST'], detail=True, url_path='close')
@@ -57,9 +60,16 @@ class TicketView(GenericViewSet, mixins.ListModelMixin):
         ticket.status = TicketStatus.objects.get(code='closed')
         ticket.save()
 
-        Message.objects.create(
+        message = Message.objects.create(
             ticket=ticket,
             user=request.user,
-            message='Ваше обращение закрыто. Спасибо за обращение!'
+            text='Ваше обращение закрыто. Спасибо за обращение!'
+        )
+
+        EmailService.send_email(
+            from_email='noreply@service_desc.com',
+            to_email=ticket.client.email,
+            subject="Ваше обращение закрыто",
+            text=message.text
         )
         return Response({'message': 'Ticket closed successfully'})

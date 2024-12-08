@@ -15,9 +15,10 @@ from tickets.services import EmailService
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Список сообщений', tags=['Сообщения']),
+    list=extend_schema(summary='Список сообщений',
+                       tags=['Сообщения | Менеджеры']),
     create=extend_schema(summary='Создать сообщение',
-                         tags=['Сообщения']),
+                         tags=['Сообщения | Менеджеры']),
 )
 class MessageViewSet(ExtendedView, GenericViewSet, mixins.ListModelMixin,
                      mixins.CreateModelMixin):
@@ -44,28 +45,19 @@ class MessageViewSet(ExtendedView, GenericViewSet, mixins.ListModelMixin,
         message = serializer.save(user=self.request.user, ticket=ticket)
 
         EmailService.send_email(
-            from_email=self.request.user.email,
+            from_email='noreply@service_desc.com',
             to_email=ticket.client.email,
             subject="Ответ на ваше обращение",
-            text=message.message
+            text=message.text
         )
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Автоответ на обращение клиента',
-                       tags=['Обращения']),
     create=extend_schema(summary='Создать обращение',
-                         tags=['Обращения']),
+                         tags=['Обращения | Клиенты']),
 )
-class ClientMessagesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                            GenericViewSet):
+class ClientMessagesViewSet(mixins.CreateModelMixin, GenericViewSet):
     serializer_class = MessageCreateSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        tickets = Ticket.objects.filter(client=user)
-        return Message.objects.filter(ticket__in=tickets).order_by(
-            '-created_at')[:1]
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -84,12 +76,12 @@ class ClientMessagesViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         message = Message.objects.create(
             ticket=ticket,
             user=None,
-            message="Ваше сообщение получено. Мы скоро свяжемся с вами."
+            text="Ваше сообщение получено. Мы скоро свяжемся с вами."
         )
 
         EmailService.send_email(
             from_email='noreply@service_desc.com',
             to_email=user.email,
             subject="Ваше сообщение получено",
-            text=message.message
+            text=message.text
         )

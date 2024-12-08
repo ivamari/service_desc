@@ -15,7 +15,7 @@ class Message(models.Model):
                              verbose_name='Пользователь')
     created_at = models.DateTimeField('Дата создания',
                                       auto_now_add=True)
-    message = models.TextField('Сообщение')
+    text = models.TextField('Сообщение')
 
     class Meta:
         verbose_name = 'Сообщение'
