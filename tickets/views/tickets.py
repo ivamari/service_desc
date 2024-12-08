@@ -42,7 +42,7 @@ class TicketView(GenericViewSet, mixins.ListModelMixin):
             return Response({'error': 'Permission denied'}, status=403)
 
         ticket.manager = request.user
-        ticket.status = TicketStatus.objects.filter(code='in_progress').first()
+        ticket.status = TicketStatus.objects.get(code='in_progress')
         ticket.save()
 
         return Response({'message': 'Ticket assigned successfully'})

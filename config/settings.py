@@ -128,7 +128,10 @@ REST_FRAMEWORK = {
 # ========== SPECTACULAR SETTINGS ==========
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Service Desc',
-    'DESCRIPTION': 'Service Desc',
+    'DESCRIPTION': 'ServiceDesk - приложение для работы с пользовательскими '
+                   'обращениями, фиксирования их в базе данных '
+                   'и возможностью принятия обращений сотрудниками '
+                   'поддержки.',
     'VERSION': '1.0.0',
 
     'SERVE_PERMISSIONS': [
