@@ -6,6 +6,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from tickets.models.messages import Message
 from tickets.models.tickets import Ticket, TicketStatus
 from tickets.permissions import IsManager
 from tickets.serializers.tickets import TicketSerializer
@@ -42,3 +43,23 @@ class TicketView(GenericViewSet, mixins.ListModelMixin):
         ticket.save()
 
         return Response({'message': 'Ticket assigned successfully'})
+
+    @extend_schema(
+        summary='Закрыть обращение',
+        tags=['Обращения'],
+        request=None,
+    )
+    @action(methods=['POST'], detail=True, url_path='close')
+    def close_ticket(self, request, pk=None):
+        ticket = self.get_object()
+        if ticket.status == TicketStatus.objects.get(code='closed'):
+            return Response({'error': 'Ticket already closed'}, status=400)
+        ticket.status = TicketStatus.objects.get(code='closed')
+        ticket.save()
+
+        Message.objects.create(
+            ticket=ticket,
+            user=request.user,
+            message='Ваше обращение закрыто. Спасибо за обращение!'
+        )
+        return Response({'message': 'Ticket closed successfully'})
