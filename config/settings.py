@@ -121,7 +121,7 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ],
 }
 
@@ -134,6 +134,9 @@ SPECTACULAR_SETTINGS = {
     'SERVE_PERMISSIONS': [
         'rest_framework.permissions.IsAuthenticated'],
 
+    'SERVE_AUTHENTICATION': [
+        'rest_framework.authentication.BasicAuthentication'],
+
     'SWAGGER_UI_SETTINGS': {
         'DeepLinking': True,
         'DisplayOperationId': True,
@@ -141,4 +144,11 @@ SPECTACULAR_SETTINGS = {
 
     'COMPONENT_SPLIT_REQUEST': True,
     'SORT_OPERATIONS': False,
+}
+
+# ========== DJOSER SETTINGS ==========
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create': 'users.serializers.CustomUserCreateSerializer',
+    },
 }

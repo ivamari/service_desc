@@ -17,7 +17,7 @@ class UserAdmin(admin.ModelAdmin):
             'fields': ('last_login', 'date_joined'),
         }),
     )
-    list_display = ('first_name', 'last_name', 'email', 'role', 'is_staff',
+    list_display = ('id', 'first_name', 'last_name', 'email', 'role', 'is_staff',
                     'is_active', 'is_superuser')
     list_display_links = ('first_name', 'last_name', 'email', )
 
